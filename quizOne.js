@@ -1,8 +1,18 @@
 // Array of questions in the quiz
 let questions = [
     {
+     prompt: `Who won the 2007 Ballon D'Or?`,
+        options: ["Lionel Messi", "Ricardo Kaka", "Robert Lewandowski", "John McLinnen"],
+        answer: "Ricardo Kaka",
+    },
+    {
+     prompt: `Which team won the 2010 Champions League?`,
+        options: ["Inter Milan", "Barcelona", "Real madrid", "Juventus"],
+        answer: "Inter Milan",
+    },
+    {
         prompt: `Who won the 1996 Ballon D'Or?`,
-        options: ["<George Weah>", "<Ricardo Kaka>", "<Matthias Sammer>", "<Hirst Stoichov>"],
+        options: ["<George Weah>", "Ricardo Kaka", "<Matthias Sammer>", "<Hirst Stoichov>"],
         answer: "<Matthias Sammer>",
     },
     {
@@ -149,8 +159,12 @@ const reStartBtn = document.querySelector("#restart");
 
 // Quiz's initial state
 let currentQuestionIndex = 0;
-let time = questions.length * 2;
+//let time = questions.length * 2;
+let time = 100;
 let timerId;
+
+let correctAnswers = 0;
+
 
 // Start quiz and hide frontpage
 function quizStart() {
@@ -187,13 +201,14 @@ function getQuestion() {
 // Check for right answers and deduct time for wrong answer, go to next question
 function questionClick() {
     if (this.value !== questions[currentQuestionIndex].answer) {
-        time = Math.max(time - 2, 0); // Deduct 2 seconds if the answer is wrong
+       // time = Math.max(time - 2, 0); // Deduct 2 seconds if the answer is wrong
         timerEl.textContent = time;
         feedbackEl.textContent = `Wrong! The correct answer was ${questions[currentQuestionIndex].answer}.`;
         feedbackEl.style.color = "red";
     } else {
         feedbackEl.textContent = "Correct!";
         feedbackEl.style.color = "green";
+        correctAnswers++;
     }
 
     // Display feedback and hide it after 5 seconds
@@ -214,13 +229,12 @@ function questionClick() {
 // End quiz by hiding questions, stop timer and show final score
 function quizEnd() {
     clearInterval(timerId); // Stop the timer
-
+    // --- FIX: Store the score at the moment the quiz ends ---
+    finalScore = correctAnswers;
     // Show the end screen
     document.getElementById("quiz-end").classList.remove("hide");
-
     // Show the final score
-    document.getElementById("score-final").textContent = time;
-
+    document.getElementById("score-final").textContent = finalScore;
     // Hide the questions section
     questionsEl.classList.add("hide");
 }
@@ -241,7 +255,8 @@ function saveHighscore() {
     const name = nameEl.value.trim();
     if (name !== "") {
         let highscores = JSON.parse(window.localStorage.getItem("highscores")) || [];
-        const newScore = { score: time, name: name };
+        // --- FIX: Use finalScore instead of time ---
+        const newScore = { score: finalScore, name: name };
         highscores.push(newScore);
         window.localStorage.setItem("highscores", JSON.stringify(highscores));
         alert("Your Score has been Submitted");
